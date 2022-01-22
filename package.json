@@ -10,6 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/amqplib": "^0.8.2",
+    "amqplib": "^0.8.0",
+    "body-parser": "^1.19.1",
+    "express": "^4.17.2",
+    "pusher": "^5.0.0",
     "typescript": "^4.5.5"
   },
   "devDependencies": {
