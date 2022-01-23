@@ -40,6 +40,7 @@ class PusherServer {
       console.log(
         `[info: realtime data sent] [destination address: ${o.destinationAddress}] [filter type: ${o.filterType}] [requestId: ${o.requestId}]`
       );
+      await this.pusherClient.trigger(<string>o.sourceAddress, "data-sent", o);
       channel.ack(<any>data);
     });
   }

@@ -18,6 +18,15 @@ const port = process.env.SERVER_PORT;
 //
 app.use("/realtime", realtime_data_processor);
 
+process.on("uncaughtException", (err) => {
+  console.log(
+    `[error: uncaughat exception] [error name: ${err.name}] [actual error: ${err.message}]`
+  );
+});
+
+process.on("unhandledRejection", (err) => {
+  console.log(`[error: unhandled promise rejections] [error name: ${err}]`);
+});
 (async () => {
   await AMQPConnection.getInstance().connectToRabbitMQ();
   await PusherServer.getInstance().consumeDataPayload();
