@@ -1,16 +1,28 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      amqHost: string;
-      amqPort: number;
+      AMQP_HOST: string;
+      AMQP_PORT: number;
+      AMQP_USER: string;
+      AMQP_PASSWORD: string;
+      PUSHER_ID: string;
+      PUSHER_KEY: string;
+      PUSHER_SECRET: string;
+      PUSHER_CLUSTER: string;
+      SERVER_PORT: number;
     }
   }
 }
 const AppConstants = {
-  Data_Exchange: "DATA_EXCHANGE",
-  Topics: {
-    data_in: "NOTIFICATION_SERVER_IN",
-    data_out: "NOTIFICATION_SERVER_OUT",
+  data_exchange: "DATA_EXCHANGE",
+  queues: {
+    data_in: "DATA_SERVER_IN",
+    data_out: "DATA_SERVER_OUT",
+    notification_in: "NOTIFICATION_IN",
+    notification_out: "NOTIFICATION_OUT",
+  },
+  routing_keys: {
+    data_key: "DATA_SERVER_KEY",
   },
 };
 
