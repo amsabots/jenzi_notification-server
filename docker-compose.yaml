@@ -12,5 +12,5 @@ services:
       - AMQP_HOST=amqp://mq
 
 networks:
-  madali-local:
+  jenzi-local:
     external: true
