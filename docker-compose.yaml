@@ -2,15 +2,15 @@ version: "3.8"
 services:
   app:
     build: .
-    container_name: jenzi-notifcation-server
+    container_name: jenzi-notification-server
     restart: always
     ports:
       - "27500:27500"
     networks:
-      - jenzi-local
+      - abc-local
     environment:
       - AMQP_HOST=amqp://mq
 
 networks:
-  jenzi-local:
+  abc-local:
     external: true

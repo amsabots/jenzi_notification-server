@@ -1,9 +1,9 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { AMQPConnection } from "./config/rabbitmq";
+import { RedisInstance } from "./config/redis-master";
 import { PusherServer } from "./consumers/pusher-sender";
 import express from "express";
-import { AppConstants } from "./config/env-var";
 
 //routes
 import realtime_data_processor from "./routes/requests";
@@ -20,16 +20,21 @@ app.use("/realtime", realtime_data_processor);
 
 process.on("uncaughtException", (err) => {
   console.log(
-    `[error: uncaughat exception] [error name: ${err.name}] [actual error: ${err.message}]`
+    `[error: uncaught exception] [error name: ${err.name}] [actual error: ${err.message}]`
   );
 });
 
+const delay = () => {
+  return new Promise((res) => setTimeout(res, 5000));
+};
+
 process.on("unhandledRejection", (err) => {
-  console.log(`[error: unhandled promise rejections] [error name: ${err}]`);
+  console.log(`[error: unhandled promise rejections] [error desc: ${err}]`);
 });
 (async () => {
   await AMQPConnection.getInstance().connectToRabbitMQ();
-  await PusherServer.getInstance().consumeDataPayload();
+  // redis connection
+  RedisInstance.getInstance().connectToRedis();
 })();
 
 app.listen(port, () => `Notification server receiving traffic on port ${port}`);

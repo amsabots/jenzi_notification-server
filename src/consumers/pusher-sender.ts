@@ -1,7 +1,16 @@
-import { AMQPConnection } from "../config/rabbitmq";
-import { AppConstants } from "../config/env-var";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import Pusher from "pusher";
-import { GenericNotificationFormat } from "../config/types";
+import {
+  GenericNotificationFormat,
+  AMQPConnection,
+  AppConstants,
+  RedisInstance,
+  constants,
+} from "../config";
+
+const set_delay = (duration = 5000) => {
+  return new Promise((res) => setTimeout(res, duration));
+};
 
 class PusherServer {
   private static instance: PusherServer;
@@ -23,25 +32,28 @@ class PusherServer {
     return PusherServer.instance;
   }
 
-  public async consumeDataPayload() {
-    const channel = await AMQPConnection.getInstance().createTopicExchangeQueue(
-      AppConstants.queues.data_in,
-      AppConstants.routing_keys.data_key,
-      AppConstants.data_exchange
+  public async consume_messages_of_type_requests() {
+    await set_delay(10000);
+    const queued_requests = await RedisInstance.getInstance().getStoreEntries(
+      constants.redis_pattern.requests
     );
-    channel.consume(AppConstants.queues.data_in, async (data) => {
-      const payload = <any>data?.content.toString();
-      const o = <GenericNotificationFormat>JSON.parse(payload);
+    queued_requests.forEach(async (element) => {
+      const {
+        destinationAddress,
+        filterType,
+        payload,
+        requestId,
+        retryLimit,
+        sourceAddress,
+      } = element;
+
+      if (retryLimit! >= 5) return;
       await this.pusherClient.trigger(
-        <string>o.destinationAddress,
-        <string>o.filterType,
-        o
+        destinationAddress!,
+        filterType!,
+        element
       );
-      console.log(
-        `[info: realtime data sent] [destination address: ${o.destinationAddress}] [filter type: ${o.filterType}] [requestId: ${o.requestId}]`
-      );
-      await this.pusherClient.trigger(<string>o.sourceAddress, "data-sent", o);
-      channel.ack(<any>data);
+      element.retryLimit = retryLimit! + 1;
     });
   }
 }

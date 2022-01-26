@@ -10,6 +10,8 @@ declare global {
       PUSHER_SECRET: string;
       PUSHER_CLUSTER: string;
       SERVER_PORT: number;
+      REDIS_HOST: string;
+      REDIS_PORT: number;
     }
   }
 }
