@@ -35,6 +35,8 @@ process.on("unhandledRejection", (err) => {
   await AMQPConnection.getInstance().connectToRabbitMQ();
   // redis connection
   RedisInstance.getInstance().connectToRedis();
+  //start consumption of pending requests - pusher
+  await PusherServer.getInstance().consume_messages_of_type_requests();
 })();
 
 app.listen(port, () => `Notification server receiving traffic on port ${port}`);

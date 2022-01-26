@@ -33,28 +33,45 @@ class PusherServer {
   }
 
   public async consume_messages_of_type_requests() {
-    await set_delay(10000);
-    const queued_requests = await RedisInstance.getInstance().getStoreEntries(
-      constants.redis_pattern.requests
-    );
-    queued_requests.forEach(async (element) => {
-      const {
-        destinationAddress,
-        filterType,
-        payload,
-        requestId,
-        retryLimit,
-        sourceAddress,
-      } = element;
-
-      if (retryLimit! >= 5) return;
-      await this.pusherClient.trigger(
-        destinationAddress!,
-        filterType!,
-        element
+    for (;;) {
+      const queued_requests = await RedisInstance.getInstance().getStoreEntries(
+        constants.redis_pattern.requests
       );
-      element.retryLimit = retryLimit! + 1;
-    });
+      queued_requests.forEach(async (element) => {
+        const {
+          destinationAddress,
+          filterType,
+          payload,
+          requestId,
+          retryLimit,
+          sourceAddress,
+        } = element;
+
+        if (retryLimit! > 4) return;
+
+        if (retryLimit === 4) {
+          await this.pusherClient.trigger(
+            sourceAddress!,
+            "requesting_fundi_timedout",
+            element
+          );
+          return;
+        }
+
+        await this.pusherClient.trigger(
+          destinationAddress!,
+          filterType!,
+          element
+        );
+        element.retryLimit = retryLimit! + 1;
+        await RedisInstance.getInstance().updateExistingRecord(
+          requestId!,
+          element,
+          constants.redis_pattern.requests
+        );
+      });
+      await set_delay(10000);
+    }
   }
 }
 
