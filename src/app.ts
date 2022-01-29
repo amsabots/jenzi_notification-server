@@ -4,6 +4,7 @@ import { AMQPConnection } from "./config/rabbitmq";
 import { RedisInstance } from "./config/redis-master";
 import { PusherServer } from "./consumers/pusher-sender";
 import express from "express";
+import cors from "cors";
 
 //routes
 import realtime_data_processor from "./routes/requests";
@@ -12,6 +13,7 @@ const app = express();
 
 // set express middleware
 app.use(express.json());
+app.use(cors());
 
 const port = process.env.SERVER_PORT;
 
