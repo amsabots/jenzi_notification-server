@@ -34,6 +34,10 @@ class AMQPConnection {
     return AMQPConnection.instance;
   }
   public async connectToRabbitMQ() {
+    const { AMQP_HOST, AMQP_PORT } = process.env;
+    console.log(
+      `[info: connecting to rabbit mq] [host: ${AMQP_HOST}] [port: ${AMQP_PORT}]`
+    );
     const conn = await amqp.connect(process.env.AMQP_HOST);
     this.channel = await conn.createChannel();
     console.log("Connection to rabbitMQ has been established");

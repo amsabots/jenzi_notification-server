@@ -33,6 +33,8 @@ class PusherServer {
   }
 
   public async consume_messages_of_type_requests() {
+    // set delay before starting this loop - allow redis to fully establish a connection
+    await set_delay(10000);
     for (;;) {
       const queued_requests = await RedisInstance.getInstance().getStoreEntries(
         constants.redis_pattern.requests
@@ -46,31 +48,36 @@ class PusherServer {
           retryLimit,
           sourceAddress,
         } = element;
+        if (Number(retryLimit) >= 4) return;
+        else {
+          element.retryLimit = Number(retryLimit!) + 1;
+          await RedisInstance.getInstance().updateExistingRecord(
+            requestId!,
+            element,
+            constants.redis_pattern.requests
+          );
+          if (Number(retryLimit) === 3) {
+            console.log(
+              `[info: resending back to source] [message: requesting for a fundi timedout waiting for fundi reply] [action: sending back to source] [destination: ${sourceAddress}] [filter type: requesting_fundi_timedout]`
+            );
+            return await this.pusherClient.trigger(
+              sourceAddress!,
+              "requesting_fundi_timedout",
+              element
+            );
+          }
 
-        if (retryLimit! > 4) return;
-
-        if (retryLimit === 4) {
           await this.pusherClient.trigger(
-            sourceAddress!,
-            "requesting_fundi_timedout",
+            destinationAddress!,
+            filterType!,
             element
           );
-          return;
+          console.log(
+            `[message: sent request to address specified] [source: ${sourceAddress}] [destination: ${destinationAddress}] [filter type: ${filterType}]`
+          );
         }
-
-        await this.pusherClient.trigger(
-          destinationAddress!,
-          filterType!,
-          element
-        );
-        element.retryLimit = retryLimit! + 1;
-        await RedisInstance.getInstance().updateExistingRecord(
-          requestId!,
-          element,
-          constants.redis_pattern.requests
-        );
       });
-      await set_delay(10000);
+      await set_delay(process.env.PUSHER_DELAY);
     }
   }
 }

@@ -9,11 +9,9 @@ This system is built to handle realtime data transfer between two connected user
 
 ### Exposed endpoint
 
-```js
-protocal: server_host: 27500 / realtime / handle - service - request;
-//for example
-localhost: 27500 / realtime / handle - service - request;
-```
+`protocal:server_host:27500/realtime-server/notify;`  
+`//for example`  
+`localhost:27500/realtime-server/notify`
 
 Make sure to append the TCP protocol when making a URL request
 
@@ -28,4 +26,4 @@ Make sure to append the TCP protocol when making a URL request
 }
 ```
 
-> > **Please note:** The payload sent over the UTL should be a POST calll and should strictly follow the format shown above
+> **Please note:** The payload sent over the TLS should be a POST calll and should strictly follow the format shown above

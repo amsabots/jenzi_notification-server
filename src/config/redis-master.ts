@@ -26,26 +26,39 @@ class RedisInstance {
     pattern: string
   ) {
     await this.redis.hmset(this.create_key(pattern, key), <never>record);
-    console.log(`new entry object created against key ${key}`);
+    console.log(
+      `new entry object created against key ${this.create_key(pattern, key)}`
+    );
   }
 
-  public async getStoreEntries(pattern: string, key = "") {
+  public getStoreEntries(
+    pattern: string
+  ): Promise<GenericNotificationFormat[]> {
     const entries: GenericNotificationFormat[] = [];
-    if (!key) {
-      this.redis.keys(pattern + "*", (err, keys) => {
-        if (err) throw err;
-        keys.forEach((element) => {
-          const u = this.redis.hgetall(element) as GenericNotificationFormat;
-          entries.push(u);
+    return new Promise(async (res, error) => {
+      this.redis.keys(pattern + ":*", async (err, keys) => {
+        if (err) error(err);
+        const p: Array<Promise<GenericNotificationFormat>> = [];
+        keys.forEach(async (k) => {
+          p.push(this.getSingleEntryRecord(k));
         });
+        const results = await Promise.all(p);
+        res(results);
       });
-    } else {
-      const u = this.redis.hgetall(
-        this.create_key(pattern, key)
-      ) as GenericNotificationFormat;
-      entries.push(u);
-    }
-    return entries.length ? entries : [];
+    });
+  }
+
+  public getSingleEntryRecord(
+    key: string,
+    pattern = ""
+  ): Promise<GenericNotificationFormat> {
+    return new Promise((res, err) => {
+      const r_key = pattern ? this.create_key(pattern, key) : key;
+      this.redis.hgetall(r_key, (e, data) => {
+        if (e) err(e);
+        res(data);
+      });
+    });
   }
 
   public async updateExistingRecord(
@@ -54,7 +67,7 @@ class RedisInstance {
     pattern: string
   ) {
     const label = this.create_key(pattern, key);
-    const c = await this.getStoreEntries(key, pattern);
+    const c = await this.getSingleEntryRecord(key, pattern);
     await this.redis.hmset(label, <never>{
       ...c,
       ...data,

@@ -12,6 +12,7 @@ declare global {
       SERVER_PORT: number;
       REDIS_HOST: string;
       REDIS_PORT: number;
+      PUSHER_DELAY: number;
     }
   }
 }

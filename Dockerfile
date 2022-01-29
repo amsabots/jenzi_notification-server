@@ -3,6 +3,7 @@ FROM node:17-alpine3.12 as BASE
 RUN mkdir /home/node/app
 
 RUN mkdir /home/node/app/node_modules && chown -R node:node /home/node/app
+RUN ls -l /home/node/app
 
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 ENV PATH=$PATH:/home/node/.npm-global/bin

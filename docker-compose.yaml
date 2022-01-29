@@ -7,10 +7,12 @@ services:
     ports:
       - "27500:27500"
     networks:
-      - abc-local
+      - pc-local
     environment:
-      - AMQP_HOST=amqp://mq
-
+      - AMQP_HOST=amqp://rabbit_mq
+      - AMQP_PORT=5672
+      - REDIS_HOST=redis_local
+      - REDIS_PORT=6379
 networks:
-  abc-local:
+  pc-local:
     external: true
