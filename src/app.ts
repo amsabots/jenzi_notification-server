@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import { AMQPConnection } from "./config/rabbitmq";
 import { RedisInstance } from "./config/redis-master";
-import { PusherServer } from "./consumers/pusher-sender";
+import { PusherServer, ConsumeRabbitMessages } from "./consumers";
 import express from "express";
 import cors from "cors";
 
@@ -37,6 +37,8 @@ const delay = () => {
   await AMQPConnection.getInstance().connectToRabbitMQ();
   // redis connection
   RedisInstance.getInstance().connectToRedis();
+  //consume rabbitMessages
+  new ConsumeRabbitMessages().initiateQueueConsumption();
   //start consumption of pending requests - pusher
   await PusherServer.getInstance().consume_messages_of_type_requests();
 })();

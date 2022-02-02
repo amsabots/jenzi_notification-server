@@ -1,6 +1,6 @@
 /* eslint-disable no-empty */
 import amqp, { Channel } from "amqplib";
-import { AppConstants as constants } from "./env-var";
+import { queues } from "./constants";
 import Pusher from "pusher";
 import events from "events";
 
@@ -23,7 +23,7 @@ import events from "events";
 
 class AMQPConnection {
   private static instance: AMQPConnection;
-  private channel!: Channel;
+  private _channel!: Channel;
   private eventEmitter = new events.EventEmitter();
 
   private constructor() {}
@@ -39,29 +39,13 @@ class AMQPConnection {
       `[info: connecting to rabbit mq] [host: ${AMQP_HOST}] [port: ${AMQP_PORT}]`
     );
     const conn = await amqp.connect(process.env.AMQP_HOST);
-    this.channel = await conn.createChannel();
+    this._channel = await conn.createChannel();
+    await this._channel.assertExchange(queues.app_exchange, "direct");
     console.log("Connection to rabbitMQ has been established");
   }
 
-  public async createTopicExchangeQueue(
-    queue: string,
-    routing_key: string,
-    exchange: string
-  ) {
-    await this.channel.assertExchange(exchange, "topic");
-    await this.channel.assertQueue(queue, { durable: true });
-    this.channel.bindQueue(queue, exchange, routing_key);
-    return this.channel;
-  }
-
-  public async sendToQueue(
-    payload: any,
-    queue: string,
-    routing_key: string,
-    exchange = constants.data_exchange
-  ) {
-    const c = await this.createTopicExchangeQueue(queue, routing_key, exchange);
-    if (c) c.sendToQueue(queue, Buffer.from(payload));
+  public get channel() {
+    return this._channel;
   }
 }
 
