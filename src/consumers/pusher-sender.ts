@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import Pusher from "pusher";
 import { RedisInstance, constants } from "../config";
+import cron from "node-cron";
 
 const set_delay = (duration = 5000) => {
   return new Promise((res) => setTimeout(res, duration));
@@ -26,63 +27,65 @@ class PusherServer {
     return PusherServer.instance;
   }
 
-  public async consume_messages_of_type_requests() {
+  private async consume_messages_of_type_requests() {
     // set delay before starting this loop - allow redis to fully establish a connection
-    await set_delay(10000);
-    for (;;) {
-      const queued_requests = await RedisInstance.getInstance().getStoreEntries(
-        constants.redis_pattern.requests
-      );
-      queued_requests.forEach(async (element) => {
-        const {
-          destinationAddress,
-          filterType,
-          payload,
-          requestId,
-          retryLimit,
-          sourceAddress,
-        } = element;
-        if (Number(retryLimit) >= 4) {
-          await RedisInstance.getInstance().removeEntry(
-            requestId!,
-            constants.redis_pattern.requests
+    const queued_requests = await RedisInstance.getInstance().getStoreEntries(
+      constants.redis_pattern.requests
+    );
+    queued_requests.forEach(async (element) => {
+      const {
+        destinationAddress,
+        filterType,
+        payload,
+        requestId,
+        retryLimit,
+        sourceAddress,
+      } = element;
+      if (Number(retryLimit) >= 4) {
+        await RedisInstance.getInstance().removeEntry(
+          requestId!,
+          constants.redis_pattern.requests
+        );
+        return;
+      } else {
+        element.retryLimit = Number(retryLimit!) + 1;
+        await RedisInstance.getInstance().updateExistingRecord(
+          requestId!,
+          element,
+          constants.redis_pattern.requests
+        );
+        if (Number(retryLimit) === 3) {
+          console.log(
+            `[info: resending back to source] [message: requesting for a fundi timedout waiting for fundi reply] [action: sending back to source] [destination: ${sourceAddress}] [filter type: requesting_fundi_timedout]`
           );
-          return;
-        } else {
-          element.retryLimit = Number(retryLimit!) + 1;
-          await RedisInstance.getInstance().updateExistingRecord(
-            requestId!,
-            element,
-            constants.redis_pattern.requests
-          );
-          if (Number(retryLimit) === 3) {
-            console.log(
-              `[info: resending back to source] [message: requesting for a fundi timedout waiting for fundi reply] [action: sending back to source] [destination: ${sourceAddress}] [filter type: requesting_fundi_timedout]`
-            );
-            return await this._pusherClient.trigger(
-              sourceAddress!,
-              "requesting_fundi_timedout",
-              element
-            );
-          }
-
-          await this._pusherClient.trigger(
-            destinationAddress!,
-            filterType!,
+          return await this._pusherClient.trigger(
+            sourceAddress!,
+            "requesting_fundi_timedout",
             element
           );
-          console.log(
-            `[message: sent request to address specified] [source: ${sourceAddress}] [destination: ${destinationAddress}] [filter type: ${filterType}]`
-          );
         }
-      });
-      await set_delay(process.env.PUSHER_DELAY);
-    }
+
+        await this._pusherClient.trigger(
+          destinationAddress!,
+          filterType!,
+          element
+        );
+        console.log(
+          `[message: sent request to address specified] [source: ${sourceAddress}] [destination: ${destinationAddress}] [filter type: ${filterType}]`
+        );
+      }
+    });
   }
 
   //getters
   public get pusher() {
     return this._pusherClient;
+  }
+
+  public runSenderTask() {
+    cron.schedule("*/15 * * * * *", async () => {
+      await this.consume_messages_of_type_requests();
+    });
   }
 }
 

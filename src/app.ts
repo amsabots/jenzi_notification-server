@@ -29,13 +29,9 @@ app.use("/realtime-server", realtime_data_processor);
 //     `[error: uncaught exception] [error name: ${err.name}] [actual error: ${err.message}]`
 //   );
 // });
-// process.on("unhandledRejection", (err) => {
-//   console.log(`[error: unhandled promise rejections] [error desc: ${err}]`);
-// });
-
-const delay = () => {
-  return new Promise((res) => setTimeout(res, 5000));
-};
+process.on("unhandledRejection", (err) => {
+  console.log(`[error: unhandled promise rejections] [error desc: ${err}]`);
+});
 
 (async () => {
   await AMQPConnection.getInstance().connectToRabbitMQ();
@@ -44,8 +40,10 @@ const delay = () => {
   //consume rabbitMessages
   new ConsumeRabbitMessages().initiateQueueConsumption();
   //start consumption of pending requests - pusher
-  await new PusherForChats().startTheConsumptionProcess();
-  await PusherServer.getInstance().consume_messages_of_type_requests();
+  new PusherForChats().startTheConsumptionProcess();
+  PusherServer.getInstance().runSenderTask();
 })();
 
-app.listen(port, () => `Notification server receiving traffic on port ${port}`);
+app.listen(port, () =>
+  console.log(`Notification server receiving traffic on port ${port}`)
+);
