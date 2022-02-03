@@ -15,12 +15,15 @@ class RedisInstance {
     return RedisInstance.instance;
   }
   public connectToRedis() {
-    this._redis = new IORedis({
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT,
-    });
-    this._redis.on("connect", () => {
-      console.log("connection to the redis server initiated");
+    return new Promise((res) => {
+      this._redis = new IORedis({
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+      });
+      this._redis.on("connect", () => {
+        console.log("connection to the redis server initiated");
+        res("done");
+      });
     });
   }
 

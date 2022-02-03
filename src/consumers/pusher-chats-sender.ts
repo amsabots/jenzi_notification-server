@@ -64,9 +64,9 @@ class PusherForChats {
     }
   }
 
-  public startTheConsumptionProcess() {
-    this.consumeChatMessages();
-    this.consumeDLRMessages();
+  public async startTheConsumptionProcess() {
+    await this.consumeChatMessages();
+    await this.consumeDLRMessages();
   }
 }
 
