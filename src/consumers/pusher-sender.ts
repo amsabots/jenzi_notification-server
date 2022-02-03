@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import Pusher from "pusher";
-import {
-  GenericNotificationFormat,
-  AMQPConnection,
-  AppConstants,
-  RedisInstance,
-  constants,
-} from "../config";
+import { RedisInstance, constants } from "../config";
 
 const set_delay = (duration = 5000) => {
   return new Promise((res) => setTimeout(res, duration));
@@ -14,12 +8,12 @@ const set_delay = (duration = 5000) => {
 
 class PusherServer {
   private static instance: PusherServer;
-  private pusherClient!: Pusher;
+  private _pusherClient!: Pusher;
 
   private constructor() {
     const { PUSHER_CLUSTER, PUSHER_ID, PUSHER_KEY, PUSHER_SECRET } =
       process.env;
-    this.pusherClient = new Pusher({
+    this._pusherClient = new Pusher({
       cluster: PUSHER_CLUSTER,
       appId: PUSHER_ID,
       key: PUSHER_KEY,
@@ -65,14 +59,14 @@ class PusherServer {
             console.log(
               `[info: resending back to source] [message: requesting for a fundi timedout waiting for fundi reply] [action: sending back to source] [destination: ${sourceAddress}] [filter type: requesting_fundi_timedout]`
             );
-            return await this.pusherClient.trigger(
+            return await this._pusherClient.trigger(
               sourceAddress!,
               "requesting_fundi_timedout",
               element
             );
           }
 
-          await this.pusherClient.trigger(
+          await this._pusherClient.trigger(
             destinationAddress!,
             filterType!,
             element
@@ -84,6 +78,11 @@ class PusherServer {
       });
       await set_delay(process.env.PUSHER_DELAY);
     }
+  }
+
+  //getters
+  public get pusher() {
+    return this._pusherClient;
   }
 }
 

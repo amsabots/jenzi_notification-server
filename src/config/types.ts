@@ -6,3 +6,11 @@ export interface GenericNotificationFormat {
   filterType?: string;
   retryLimit?: number;
 }
+export interface ChatMessage {
+  messageId: string;
+  message: string;
+  delivered: boolean;
+  sent: boolean;
+  sourceId: string;
+  destinationId: string;
+}
