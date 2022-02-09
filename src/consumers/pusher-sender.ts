@@ -42,11 +42,7 @@ class PusherServer {
         retryLimit,
         sourceAddress,
       } = element;
-      if (
-        element.filterType !== pusher_filters.request_user ||
-        element.filterType !== pusher_filters.user_accepted
-      )
-        return;
+
       if (Number(retryLimit) >= 4) {
         await RedisInstance.getInstance().removeEntry(
           requestId!,
