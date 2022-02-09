@@ -33,16 +33,22 @@ const consume_user_accepted = async () => {
       element,
       redis_pattern.requests
     );
+    console.log(
+      `[info: sending user accepted response to client] [destination: ${destinationAddress}]`
+    );
     return await pusher.pusher.trigger(
-      sourceAddress!,
-      pusher_filters.accept_response_timedout,
+      destinationAddress!,
+      filterType,
       element
     );
   });
 };
 
 export const consumeResponseToRequests = () => {
-  cron.schedule("*/7 * * * * *", async () => {
+  console.log(
+    `Schedular fro consuming incoming responses to sent requests has been initialized`
+  );
+  cron.schedule("*/5 * * * * *", async () => {
     await consume_user_accepted();
   });
 };
