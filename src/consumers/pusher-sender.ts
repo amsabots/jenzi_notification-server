@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import Pusher from "pusher";
-import { RedisInstance, constants } from "../config";
+import { RedisInstance, constants, GenericNotificationFormat } from "../config";
 import cron from "node-cron";
+import { pusher_filters } from ".";
 
 const set_delay = (duration = 5000) => {
   return new Promise((res) => setTimeout(res, duration));
@@ -29,7 +30,7 @@ class PusherServer {
 
   private async consume_messages_of_type_requests() {
     // set delay before starting this loop - allow redis to fully establish a connection
-    const queued_requests = await RedisInstance.getInstance().getStoreEntries(
+    let queued_requests = await RedisInstance.getInstance().getStoreEntries(
       constants.redis_pattern.requests
     );
     queued_requests.forEach(async (element) => {
@@ -41,6 +42,11 @@ class PusherServer {
         retryLimit,
         sourceAddress,
       } = element;
+      if (
+        element.filterType !== pusher_filters.request_user ||
+        element.filterType !== pusher_filters.user_accepted
+      )
+        return;
       if (Number(retryLimit) >= 4) {
         await RedisInstance.getInstance().removeEntry(
           requestId!,
@@ -60,7 +66,7 @@ class PusherServer {
           );
           return await this._pusherClient.trigger(
             sourceAddress!,
-            "requesting_fundi_timedout",
+            pusher_filters.request_user_timedout,
             element
           );
         }
@@ -83,7 +89,7 @@ class PusherServer {
   }
 
   public runSenderTask() {
-    cron.schedule("*/15 * * * * *", async () => {
+    cron.schedule("*/10 * * * * *", async () => {
       await this.consume_messages_of_type_requests();
     });
   }

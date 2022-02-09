@@ -2,6 +2,7 @@ export const redis_pattern = {
   requests: "jenzi:requests",
   chats: "jenzi:chats",
   chats_dlr: "jenzi:dlr",
+  new_project: "jenzi:projects",
 };
 
 export const queues = {
