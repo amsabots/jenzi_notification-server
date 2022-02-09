@@ -46,7 +46,7 @@ const consume_user_accepted = async () => {
 
 export const consumeResponseToRequests = () => {
   console.log(
-    `Schedular fro consuming incoming responses to sent requests has been initialized`
+    `Scheduler for consuming incoming responses to sent requests has been initialized.............`
   );
   cron.schedule("*/5 * * * * *", async () => {
     await consume_user_accepted();
