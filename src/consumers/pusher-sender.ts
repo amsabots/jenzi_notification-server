@@ -43,6 +43,7 @@ class PusherServer {
         sourceAddress,
       } = element;
 
+      if (filterType !== pusher_filters.request_user) return;
       if (Number(retryLimit) >= 4) {
         await RedisInstance.getInstance().removeEntry(
           requestId!,
@@ -85,7 +86,7 @@ class PusherServer {
   }
 
   public runSenderTask() {
-    cron.schedule("*/6 * * * * *", async () => {
+    cron.schedule("*/10 * * * * *", async () => {
       await this.consume_messages_of_type_requests();
     });
   }
