@@ -10,6 +10,9 @@ import {
 import express from "express";
 import cors from "cors";
 
+// pusher consume modules
+import { startConsumption } from "./pusher-consumers";
+
 //routes
 import realtime_data_processor from "./routes/requests";
 
@@ -42,6 +45,8 @@ process.on("unhandledRejection", (err) => {
   //start consumption of pending requests - pusher
   new PusherForChats().startTheConsumptionProcess();
   PusherServer.getInstance().runSenderTask();
+  // universal pusher consumer
+  startConsumption();
 })();
 
 app.listen(port, () =>
