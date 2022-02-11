@@ -15,6 +15,7 @@ const router = express.Router();
 //create notification on the fly
 router.post("/notify", async (req, res) => {
   const body: GenericNotificationFormat = req.body;
+  console.log(body);
   body.retryLimit = 0;
   const requestId = random.generate({ charset: "hex" });
   body.requestId = requestId;

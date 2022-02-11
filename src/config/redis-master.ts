@@ -32,10 +32,7 @@ class RedisInstance {
     record: GenericNotificationFormat,
     pattern: string
   ) {
-    await this._redis.hmset(
-      this.create_key(pattern, key),
-      JSON.stringify(record)
-    );
+    await this._redis.hmset(this.create_key(pattern, key), <any>record);
     console.log(
       `new entry object created against key ${this.create_key(pattern, key)}`
     );
@@ -65,7 +62,7 @@ class RedisInstance {
       const r_key = pattern ? this.create_key(pattern, key) : key;
       this._redis.hgetall(r_key, (e, data) => {
         if (e) err(e);
-        res(JSON.parse(<any>data));
+        res(data);
       });
     });
   }
