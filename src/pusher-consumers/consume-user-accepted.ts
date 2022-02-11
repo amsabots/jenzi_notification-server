@@ -9,6 +9,7 @@ const redis = RedisInstance.getInstance();
 const consume_user_accepted = async () => {
   const accepted = await redis.getStoreEntries(redis_pattern.requests);
   accepted.forEach(async (element) => {
+    console.log(element);
     if (element.filterType !== pusher_filters.user_accepted) return;
     const {
       destinationAddress,
