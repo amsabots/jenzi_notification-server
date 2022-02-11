@@ -32,9 +32,9 @@ class RedisInstance {
     record: GenericNotificationFormat,
     pattern: string
   ) {
-    await this._redis.hmset(
+    await this._redis.set(
       this.create_key(pattern, key),
-      <any>JSON.stringify(record)
+      JSON.stringify(record)
     );
     console.log(
       `new entry object created against key ${this.create_key(pattern, key)}`
@@ -63,25 +63,12 @@ class RedisInstance {
   ): Promise<GenericNotificationFormat> {
     return new Promise((res, err) => {
       const r_key = pattern ? this.create_key(pattern, key) : key;
-      this._redis.hgetall(r_key, (e, data) => {
-        if (e) err(e);
-        res(data);
+      this._redis.get(r_key, (data) => {
+        res(JSON.parse(<any>data));
       });
     });
   }
 
-  public async updateExistingRecord(
-    key: string,
-    data: GenericNotificationFormat,
-    pattern: string
-  ) {
-    const label = this.create_key(pattern, key);
-    const c = await this.getSingleEntryRecord(key, pattern);
-    await this._redis.hmset(label, <never>{
-      ...c,
-      ...data,
-    });
-  }
   public async removeEntry(key: string, pattern: string) {
     const state = await this._redis.del(this.create_key(pattern, key));
     if (state !== 1) throw "Deletion operation failed";

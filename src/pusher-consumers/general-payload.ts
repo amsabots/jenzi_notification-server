@@ -28,11 +28,7 @@ const consume_general_payload = async () => {
     }
 
     element.retryLimit = Number(retryLimit) + 1;
-    await redis.updateExistingRecord(
-      requestId!,
-      element,
-      redis_pattern.requests
-    );
+    await redis.createNewRecord(requestId!, element, redis_pattern.requests);
     console.log(
       `[info: sending some genral classified data to user] [destination: ${destinationAddress}]`
     );

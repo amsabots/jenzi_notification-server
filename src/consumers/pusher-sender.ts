@@ -52,7 +52,7 @@ class PusherServer {
         return;
       } else {
         element.retryLimit = Number(retryLimit!) + 1;
-        await RedisInstance.getInstance().updateExistingRecord(
+        await RedisInstance.getInstance().createNewRecord(
           requestId!,
           element,
           constants.redis_pattern.requests
