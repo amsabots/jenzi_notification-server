@@ -29,11 +29,7 @@ const consume_user_accepted = async () => {
     }
 
     element.retryLimit = Number(retryLimit) + 1;
-    await redis.updateExistingRecord(
-      requestId!,
-      element,
-      redis_pattern.requests
-    );
+    await redis.createNewRecord(requestId!, element, redis_pattern.requests);
     console.log(
       `[info: sending user accepted response to client] [destination: ${destinationAddress}]`
     );
