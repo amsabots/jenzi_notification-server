@@ -61,10 +61,10 @@ class RedisInstance {
     key: string,
     pattern = ""
   ): Promise<GenericNotificationFormat> {
-    return new Promise((res, err) => {
+    return new Promise((res, rej) => {
       const r_key = pattern ? this.create_key(pattern, key) : key;
-      this._redis.get(r_key, (data) => {
-        console.log("key", r_key);
+      this._redis.get(r_key, (err, data) => {
+        if (err) return rej(err);
         res(JSON.parse(<any>data));
       });
     });
