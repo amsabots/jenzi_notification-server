@@ -9,9 +9,9 @@ services:
     networks:
       - pc-local
     environment:
-      - AMQP_HOST=amqp://rabbit_mq
+      - AMQP_HOST=amqp://mq
       - AMQP_PORT=5672
-      - REDIS_HOST=redis_local
+      - REDIS_HOST=redis_server
       - REDIS_PORT=6379
 networks:
   pc-local:
