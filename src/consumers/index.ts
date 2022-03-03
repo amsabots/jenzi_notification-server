@@ -1,6 +1,5 @@
 import { ConsumeRabbitMessages } from "./incoming-chats";
 import { PusherServer } from "./pusher-sender";
-import { PusherForChats } from "./pusher-chats-sender";
 
 const pusher_filters = {
   request_user: "request_user",
@@ -11,4 +10,4 @@ const pusher_filters = {
   general_payload: "general_channel",
 };
 
-export { PusherServer, ConsumeRabbitMessages, PusherForChats, pusher_filters };
+export { PusherServer, ConsumeRabbitMessages, pusher_filters };

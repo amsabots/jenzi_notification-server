@@ -11,6 +11,8 @@ export interface ChatMessage {
   message: string;
   delivered: boolean;
   sent: boolean;
-  sourceId: string;
-  destinationId: string;
+  source: string;
+  destination: string;
+  tag: "message" | "info" | "error";
+  createdAt: number;
 }

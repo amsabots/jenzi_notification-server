@@ -1,75 +1,55 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  AMQPConnection,
-  constants,
-  RedisInstance,
-  ChatMessage,
-} from "../config";
+import { AMQPConnection, constants, ChatMessage } from "../config";
+import randomgen from "randomstring";
+import { firebase_db } from "../config/firebase";
+import { set, ref, update } from "firebase/database";
 
 class ConsumeRabbitMessages {
   private rabbit = AMQPConnection.getInstance();
-  private redis = RedisInstance.getInstance();
   //constructor thingy
   constructor() {}
 
-  //purpose of this class
-  private consumeIncomingMessages() {
-    console.log(
-      `Listening for messages on queue ${constants.queues.incoming_messages}`
-    );
-    this.rabbit.channel.consume(
-      constants.queues.incoming_messages,
-      async (data) => {
-        const content: ChatMessage = JSON.parse(
-          <never>data?.content.toString()
-        );
-        await this.redis.redis.hmset(
-          this.sys_key(content.messageId),
-          <never>content
-        );
-        this.rabbit.channel.ack(data!);
-      }
-    );
-  }
+  private consumeIncomingChats() {
+    console.log(`[info: consuming incoming chats message]`);
+    this.rabbit.channel.consume(constants.queues.incoming_messages, (data) => {
+      const messageId = randomgen.generate({ charset: "hex" });
+      const { source, destination, chatroomId, message, tag } = JSON.parse(
+        <any>data?.content.toString()
+      );
 
-  private consumeDLRReports() {
-    console.log(
-      `Listening for DLR messages on queue ${constants.queues.dlr_reports}`
-    );
-    this.rabbit.channel.consume(constants.queues.dlr_reports, async (data) => {
-      const { chats, chats_dlr } = constants.redis_pattern;
-      const content: ChatMessage = JSON.parse(<never>data?.content.toString());
-      //remove the object from the dlr queue and create a dlr report and send it back to message owner
-      await this.redis.removeEntry(content.messageId, chats);
-      //create a delivery message
-      await this.redis.redis.hmset(
-        `${chats_dlr}:${content.messageId}`,
-        <never>content
+      set(ref(firebase_db, `${chatroomId}/${messageId}`), {
+        destination,
+        source,
+        message: message,
+        tag: tag || "message",
+        createdAt: new Date().getTime(),
+        delivered: false,
+        sent: true,
+      });
+      console.log(
+        `[info: chat message sent] [destination: ${destination}] [source: ${source}]`
       );
       this.rabbit.channel.ack(data!);
     });
   }
 
-  private consumeRemoveDLRReportTriggers() {
-    console.log(
-      `Listening for remove DLR messages on queue ${constants.queues.remove_dlr}`
-    );
-    this.rabbit.channel.consume(constants.queues.remove_dlr, async (data) => {
-      const content = data?.content.toString().replace(/"/g, "");
-      await this.redis.redis.del(
-        `${constants.redis_pattern.chats_dlr}:${content}`
+  private updateMessage() {
+    console.log(`consuming update requests`);
+    this.rabbit.channel.consume(constants.queues.update_messages, (data) => {
+      const { messageId, chatroomId, isDelivered, isDeleted } = JSON.parse(
+        <any>data?.content.toString()
       );
+      update(ref(firebase_db, `${chatroomId}/${messageId}`), {
+        delivered: isDelivered,
+        deleted: isDeleted,
+      });
       this.rabbit.channel.ack(data!);
     });
   }
 
   public initiateQueueConsumption() {
-    this.consumeIncomingMessages();
-    this.consumeDLRReports();
-    this.consumeRemoveDLRReportTriggers();
-  }
-  private sys_key(key: string) {
-    return `${constants.redis_pattern.chats}:${key}`;
+    this.consumeIncomingChats();
+    this.updateMessage();
   }
 }
 

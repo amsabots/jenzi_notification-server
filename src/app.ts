@@ -2,11 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import { AMQPConnection } from "./config/rabbitmq";
 import { RedisInstance } from "./config/redis-master";
-import {
-  PusherServer,
-  ConsumeRabbitMessages,
-  PusherForChats,
-} from "./consumers";
+import { PusherServer, ConsumeRabbitMessages } from "./consumers";
 import express from "express";
 import cors from "cors";
 
@@ -15,6 +11,7 @@ import { startConsumption } from "./pusher-consumers";
 
 //routes
 import realtime_data_processor from "./routes/requests";
+import { ChatRouter } from "./routes/chats";
 
 const app = express();
 
@@ -26,6 +23,7 @@ const port = process.env.SERVER_PORT;
 
 //
 app.use("/realtime-server", realtime_data_processor);
+app.use("/chats", ChatRouter);
 
 // process.on("uncaughtException", (err) => {
 //   console.log(
@@ -37,16 +35,16 @@ process.on("unhandledRejection", (err) => {
 });
 
 (async () => {
-  // await AMQPConnection.getInstance().connectToRabbitMQ();
-  // // redis connection
-  // await RedisInstance.getInstance().connectToRedis();
-  // //consume rabbitMessages
-  // new ConsumeRabbitMessages().initiateQueueConsumption();
-  // //start consumption of pending requests - pusher
-  // new PusherForChats().startTheConsumptionProcess();
-  // PusherServer.getInstance().runSenderTask();
-  // // universal pusher consumer
-  // startConsumption();
+  await AMQPConnection.getInstance().connectToRabbitMQ();
+  AMQPConnection.getInstance().initializeQueueSystemBinderBuilder();
+  // redis connection
+  await RedisInstance.getInstance().connectToRedis();
+  //consume rabbitMessages
+  new ConsumeRabbitMessages().initiateQueueConsumption();
+  //start consumption of pending requests - pusher
+  PusherServer.getInstance().runSenderTask();
+  // universal pusher consumer
+  startConsumption();
 })();
 
 app.listen(port, () =>

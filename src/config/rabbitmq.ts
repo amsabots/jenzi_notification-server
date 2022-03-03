@@ -3,6 +3,7 @@ import amqp, { Channel } from "amqplib";
 import { queues } from "./constants";
 import Pusher from "pusher";
 import events from "events";
+import { constants } from ".";
 
 /**
  *  Notification and realtime data system using rabbit MQ
@@ -44,8 +45,34 @@ class AMQPConnection {
     console.log("Connection to rabbitMQ has been established");
   }
 
+  private async queueBuild() {
+    await this._channel.assertQueue(constants.queues.incoming_messages, {
+      durable: true,
+    });
+    await this._channel.assertQueue(constants.queues.update_messages, {
+      durable: true,
+    });
+  }
+
+  private async queueBinder() {
+    await this._channel.bindQueue(
+      constants.queues.incoming_messages,
+      constants.queues.app_exchange,
+      constants.keys.incoming_messages_key
+    );
+    await this._channel.bindQueue(
+      constants.queues.update_messages,
+      constants.queues.app_exchange,
+      constants.keys.update_messages_key
+    );
+  }
+
   public get channel() {
     return this._channel;
+  }
+  public initializeQueueSystemBinderBuilder() {
+    this.queueBuild();
+    this.queueBinder();
   }
 }
 
