@@ -37,16 +37,16 @@ process.on("unhandledRejection", (err) => {
 });
 
 (async () => {
-  await AMQPConnection.getInstance().connectToRabbitMQ();
-  // redis connection
-  await RedisInstance.getInstance().connectToRedis();
-  //consume rabbitMessages
-  new ConsumeRabbitMessages().initiateQueueConsumption();
-  //start consumption of pending requests - pusher
-  new PusherForChats().startTheConsumptionProcess();
-  PusherServer.getInstance().runSenderTask();
-  // universal pusher consumer
-  startConsumption();
+  // await AMQPConnection.getInstance().connectToRabbitMQ();
+  // // redis connection
+  // await RedisInstance.getInstance().connectToRedis();
+  // //consume rabbitMessages
+  // new ConsumeRabbitMessages().initiateQueueConsumption();
+  // //start consumption of pending requests - pusher
+  // new PusherForChats().startTheConsumptionProcess();
+  // PusherServer.getInstance().runSenderTask();
+  // // universal pusher consumer
+  // startConsumption();
 })();
 
 app.listen(port, () =>
