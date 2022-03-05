@@ -36,7 +36,7 @@ process.on("unhandledRejection", (err) => {
 
 (async () => {
   await AMQPConnection.getInstance().connectToRabbitMQ();
-  AMQPConnection.getInstance().initializeQueueSystemBinderBuilder();
+  await AMQPConnection.getInstance().initializeQueueSystemBinderBuilder();
   // redis connection
   await RedisInstance.getInstance().connectToRedis();
   //consume rabbitMessages

@@ -70,9 +70,8 @@ class AMQPConnection {
   public get channel() {
     return this._channel;
   }
-  public initializeQueueSystemBinderBuilder() {
-    this.queueBuild();
-    this.queueBinder();
+  public async initializeQueueSystemBinderBuilder() {
+    await Promise.all([this.queueBuild(), this.queueBinder()]);
   }
 }
 
