@@ -6,13 +6,12 @@ services:
     restart: always
     ports:
       - "27500:27500"
-    networks:
-      - pc-local
     environment:
-      - AMQP_HOST=amqp://mq
+      - AMQP_HOST=amqp://localhost
       - AMQP_PORT=5672
-      - REDIS_HOST=redis-server
+      - REDIS_HOST=localhost
       - REDIS_PORT=6379
+    network_mode: host
 networks:
   pc-local:
     external: true
