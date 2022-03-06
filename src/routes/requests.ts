@@ -38,12 +38,16 @@ router.get("/notify/:id", async (req, res) => {
 
 //delete notification - remove from redis and return
 router.delete("/notify/:requestId", async (req, res) => {
-  const { requestId } = req.params;
-  await RedisInstance.getInstance().removeEntry(
-    requestId,
-    constants.redis_pattern.requests
-  );
-  res.send({ message: "Deletion complete" });
+ try {
+    const { requestId } = req.params;
+    await RedisInstance.getInstance().removeEntry(
+      requestId,
+      constants.redis_pattern.requests
+    );
+    res.send({ message: "Deletion complete" });
+ } catch (error) {
+   console.log(error)
+ }
 });
 
 export default router;
