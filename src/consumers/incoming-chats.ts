@@ -17,7 +17,7 @@ class ConsumeRabbitMessages {
         <any>data?.content.toString()
       );
 
-      set(ref(firebase_db, `${chatroomId}/${messageId}`), {
+      set(ref(firebase_db, `chats/${chatroomId}/${messageId}`), {
         destination,
         source,
         message: message,
