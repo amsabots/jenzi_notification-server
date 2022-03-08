@@ -86,7 +86,7 @@ class PusherServer {
   }
 
   public runSenderTask() {
-    cron.schedule("*/10 * * * * *", async () => {
+    cron.schedule("*/6 * * * * *", async () => {
       await this.consume_messages_of_type_requests();
     });
   }
