@@ -61,11 +61,20 @@ class PusherServer {
           console.log(
             `[info: resending back to source] [message: requesting for a fundi timedout waiting for fundi reply] [action: sending back to source] [destination: ${sourceAddress}] [filter type: requesting_fundi_timedout]`
           );
-          return await this._pusherClient.trigger(
+          const timeout_to_client = this._pusherClient.trigger(
             sourceAddress!,
             pusher_filters.request_user_timedout,
             element
           );
+          const timeout_to_fundi = this._pusherClient.trigger(
+            destinationAddress!,
+            pusher_filters.request_user_timedout,
+            element
+          );
+          console.log(
+            `[info: timeout for the request sent both ways] [message: message if for the job request timeout]`
+          );
+          return await Promise.all([timeout_to_client, timeout_to_fundi]);
         }
 
         await this._pusherClient.trigger(
