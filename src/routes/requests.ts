@@ -30,23 +30,27 @@ router.post("/notify", async (req, res) => {
 });
 
 router.post("/notify-once", async (req, res) => {
-  const body: GenericNotificationFormat = req.body;
-  console.log(body);
-  if (body.requestId) {
-    await RedisInstance.getInstance().removeEntry(
-      body.requestId,
-      constants.redis_pattern.requests
+  try {
+    const body: GenericNotificationFormat = req.body;
+    console.log(body);
+    if (body.requestId) {
+      await RedisInstance.getInstance().removeEntry(
+        body.requestId,
+        constants.redis_pattern.requests
+      );
+    }
+    await pusher.pusher.trigger(
+      body.destinationAddress!,
+      body.filterType!,
+      body.payload
     );
-  }
-  await pusher.pusher.trigger(
-    body.destinationAddress!,
-    body.filterType!,
-    body.payload
-  );
 
-  res.send(
-    `[info: request sent to destination] [destination:${body.destinationAddress}] [source: ${body.sourceAddress}]  [filetrtype: ${body.filterType}]`
-  );
+    res.send(
+      `[info: request sent to destination] [destination:${body.destinationAddress}] [source: ${body.sourceAddress}]  [filetrtype: ${body.filterType}]`
+    );
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 //get user notification - filter by sourceAddress; in this client app Id
