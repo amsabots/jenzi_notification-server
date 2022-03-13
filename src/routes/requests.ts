@@ -1,8 +1,10 @@
 import express from "express";
 import random from "randomstring";
 import { constants, GenericNotificationFormat, RedisInstance } from "../config";
+import { PusherServer } from "../consumers";
 
 const router = express.Router();
+const pusher = PusherServer.getInstance();
 
 /**
  *
@@ -27,6 +29,25 @@ router.post("/notify", async (req, res) => {
   res.send({ requestId });
 });
 
+router.post("/notify-once", async (req, res) => {
+  const body: GenericNotificationFormat = req.body;
+  if (body.requestId) {
+    await RedisInstance.getInstance().removeEntry(
+      body.requestId,
+      constants.redis_pattern.requests
+    );
+  }
+  await pusher.pusher.trigger(
+    body.destinationAddress!,
+    body.filterType!,
+    body.payload
+  );
+
+  res.send(
+    `[info: request sent to destination] [destination:${body.destinationAddress}] [source: ${body.sourceAddress}]  [filetrtype: ${body.filterType}]`
+  );
+});
+
 //get user notification - filter by sourceAddress; in this client app Id
 router.get("/notify/:id", async (req, res) => {
   const { id } = req.params;
@@ -38,16 +59,16 @@ router.get("/notify/:id", async (req, res) => {
 
 //delete notification - remove from redis and return
 router.delete("/notify/:requestId", async (req, res) => {
- try {
+  try {
     const { requestId } = req.params;
     await RedisInstance.getInstance().removeEntry(
       requestId,
       constants.redis_pattern.requests
     );
     res.send({ message: "Deletion complete" });
- } catch (error) {
-   console.log(error)
- }
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 export default router;
