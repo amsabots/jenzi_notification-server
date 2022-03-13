@@ -31,7 +31,7 @@ router.post("/notify", async (req, res) => {
 
 router.post("/notify-once", async (req, res) => {
   try {
-    const body: GenericNotificationFormat = req.body;
+    const body = req.body;
     console.log(body);
     if (body.requestId) {
       await RedisInstance.getInstance().removeEntry(
