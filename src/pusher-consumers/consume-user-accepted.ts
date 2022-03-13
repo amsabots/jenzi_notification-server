@@ -18,7 +18,7 @@ const consume_user_accepted = async () => {
       sourceAddress,
     } = element;
 
-    if (Number(retryLimit) > 2) {
+    if (Number(retryLimit) > 1) {
       await redis.removeEntry(requestId!, redis_pattern.requests);
       return await pusher.pusher.trigger(
         sourceAddress!,
