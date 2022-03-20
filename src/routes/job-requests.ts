@@ -24,6 +24,7 @@ const create_firebase_entry = (userId: string, payload: RequestPayload) => {
     set(path, <RequestPayload>{
       requestId: payload.requestId,
       event: payload.status,
+      createdAt: new Date().getTime(),
     })
       .then((re) => res(re))
       .catch((e) => rej(e));
