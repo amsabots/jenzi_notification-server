@@ -12,6 +12,7 @@ import { startConsumption } from "./pusher-consumers";
 //routes
 import realtime_data_processor from "./routes/requests";
 import { ChatRouter } from "./routes/chats";
+import { RequestsRouter, house_keeper_checker } from "./routes/job-requests";
 
 const app = express();
 
@@ -24,6 +25,7 @@ const port = process.env.SERVER_PORT;
 //
 app.use("/realtime-server", realtime_data_processor);
 app.use("/chats", ChatRouter);
+app.use("/jobs", RequestsRouter);
 
 process.on("uncaughtException", (err) => {
   console.log(
@@ -41,10 +43,9 @@ process.on("unhandledRejection", (err) => {
   await RedisInstance.getInstance().connectToRedis();
   //consume rabbitMessages
   new ConsumeRabbitMessages().initiateQueueConsumption();
-  //start consumption of pending requests - pusher
-  PusherServer.getInstance().runSenderTask();
-  // universal pusher consumer
-  startConsumption();
+
+  //initiate job scheduler consumer and clean up function
+  house_keeper_checker();
 })();
 
 app.listen(port, () =>
