@@ -122,6 +122,8 @@ const house_keeper_checker = () => {
               status: "PROJECTTIMEOUT",
             }),
           ]);
+          //update redis record
+          await redis.redis.del(project_key(data.requestId!));
         }
       });
     });
