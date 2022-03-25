@@ -2,7 +2,7 @@
 import { AMQPConnection, constants, ChatMessage } from "../config";
 import randomgen from "randomstring";
 import { firebase_db } from "../config/firebase";
-import { set, ref, update } from "firebase/database";
+import { set, ref, update, push } from "firebase/database";
 
 class ConsumeRabbitMessages {
   private rabbit = AMQPConnection.getInstance();
@@ -17,7 +17,7 @@ class ConsumeRabbitMessages {
         <any>data?.content.toString()
       );
 
-      set(ref(firebase_db, `chats/${chatroomId}/${messageId}`), {
+      push(ref(firebase_db, `chats/${chatroomId}`), {
         destination,
         source,
         message: message,
