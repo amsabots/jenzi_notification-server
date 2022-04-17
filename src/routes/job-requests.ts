@@ -71,6 +71,7 @@ router
     await create_firebase_entry(body.destination?.accountId!, {
       status: "JOBREQUEST",
       requestId,
+      user: body.user,
     });
     logger(
       `[info: new job request created] [user: ${body.user?.clientId}] [destination: ${body.destination?.accountId}]`
