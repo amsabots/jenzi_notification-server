@@ -31,10 +31,7 @@ const create_firebase_entry = (userId: string, payload: RequestPayload) => {
       .catch((e) => rej(e));
   });
 };
-const update_project_entry = async (
-  userId: string,
-  payload: RequestPayload
-) => {
+const update_project_entry = async (userId: string, payload: {}) => {
   const path = ref(firebase_db, `jobalerts/${userId}`);
   await update(path, payload);
 };
@@ -127,7 +124,7 @@ const house_keeper_checker = () => {
             `[info: job request timeout] [jobId: ${data.requestId}] [client: ${data.user?.clientId}] [fundi: ${data.destination?.accountId}]`
           );
           await update_project_entry(data.destination?.accountId!, {
-            status: "PROJECTTIMEOUT",
+            event: "PROJECTTIMEOUT",
           });
           //update redis record
           await redis.redis.del(project_key(data.requestId!));
