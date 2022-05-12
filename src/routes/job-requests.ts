@@ -91,7 +91,11 @@ router
     // get the actual object from redis
     const data = await get_object_payload(id);
     //update the new object in redis
-    await set_data_to_redis(id, { ...data, status: body.status });
+    await set_data_to_redis(
+      id,
+      Object.assign({ ...data, status: body.status })
+    );
+
     data.status = body.status;
     res.send(data);
   })
@@ -117,10 +121,6 @@ const house_keeper_checker = () => {
           );
           await Promise.all([
             create_firebase_entry(data.destination?.accountId!, {
-              requestId: data.requestId,
-              status: "PROJECTTIMEOUT",
-            }),
-            create_firebase_entry(data.user?.clientId!, {
               requestId: data.requestId,
               status: "PROJECTTIMEOUT",
             }),
