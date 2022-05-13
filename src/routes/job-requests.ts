@@ -137,7 +137,6 @@ const house_keeper_checker = () => {
             case "REQUESTDECLINED":
             case "PROJECTCREATED":
               const new_ttl = data.ttl! + 30000;
-              console.log(new Date().getTime() - new_ttl);
               if (new_ttl < new Date().getTime()) {
                 await remove_firebase_entry(data.destination?.accountId!);
                 await redis.redis.del(project_key(data.requestId!));
