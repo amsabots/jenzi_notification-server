@@ -117,17 +117,24 @@ const house_keeper_checker = () => {
       key.forEach(async (element) => {
         let d: any = await redis.redis.get(element);
         const data = <RequestPayload>JSON.parse(d);
-        if (data.status !== "JOBREQUEST") return;
         //send a request timeout request
         if (data.ttl! < new Date().getTime()) {
-          logger(
-            `[info: job request timeout] [jobId: ${data.requestId}] [client: ${data.user?.clientId}] [fundi: ${data.destination?.accountId}]`
-          );
-          await update_project_entry(data.destination?.accountId!, {
-            event: "PROJECTTIMEOUT",
-          });
-          //update redis record
-          await redis.redis.del(project_key(data.requestId!));
+          switch (data.status!) {
+            case "JOBREQUEST":
+              logger(
+                `[info: job request timeout] [jobId: ${data.requestId}] [client: ${data.user?.clientId}] [fundi: ${data.destination?.accountId}]`
+              );
+              await update_project_entry(data.destination?.accountId!, {
+                event: "PROJECTTIMEOUT",
+              });
+              //update redis record
+              await redis.redis.del(project_key(data.requestId!));
+              break;
+            case "PROJECTTIMEOUT":
+              await remove_firebase_entry(data.destination?.accountId!);
+            default:
+              break;
+          }
         }
       });
     });
