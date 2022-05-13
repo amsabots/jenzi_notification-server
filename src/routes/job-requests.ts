@@ -132,6 +132,15 @@ const house_keeper_checker = () => {
               break;
             case "PROJECTTIMEOUT":
               await remove_firebase_entry(data.destination?.accountId!);
+              break;
+            case "REQUESTACCEPTED":
+            case "REQUESTDECLINED":
+            case "PROJECTCREATED":
+              const new_ttl = data.ttl! + 30000;
+              if (new_ttl < new Date().getTime()) {
+                await remove_firebase_entry(data.destination?.accountId!);
+                await redis.redis.del(project_key(data.requestId!));
+              }
             default:
               break;
           }

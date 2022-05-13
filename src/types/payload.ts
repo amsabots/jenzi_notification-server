@@ -6,7 +6,7 @@ export interface RequestPayload {
   status?:
     | "JOBREQUEST"
     | "REQUESTDECLINED"
-    | " REQUESTACCEPTED"
+    | "REQUESTACCEPTED"
     | "PROJECTCREATED"
     | "PROJECTTIMEOUT";
   requestId?: string;
