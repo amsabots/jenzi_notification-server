@@ -4,7 +4,7 @@ export interface RequestPayload {
   payload?: {};
   ttl?: number;
   //prettier-ignore
-  status?:| "JOBREQUEST"| "REQUESTDECLINED"| "REQUESTACCEPTED"| "PROJECTCREATED"| "PROJECTTIMEOUT";
+  status?:| "JOBREQUEST"| "REQUESTDECLINED"| "REQUESTACCEPTED"|"PROJECTTIMEOUT"|"ACK"
   requestId?: string;
   createdAt?: number;
 }
