@@ -2,7 +2,7 @@ import express from "express";
 import { RequestPayload } from "../types";
 import path from "path";
 import { firebase_db } from "../config/firebase";
-import { ref, set, update, remove } from "firebase/database";
+import { ref, set, update, remove, get } from "firebase/database";
 import { constants, RedisInstance } from "../config";
 import Randomstring from "randomstring";
 import cron from "node-cron";
@@ -117,6 +117,10 @@ const house_keeper_checker = () => {
       key.forEach(async (element) => {
         let d: any = await redis.redis.get(element);
         const data = <RequestPayload>JSON.parse(d);
+        //prettier-ignore
+        const query = ref(firebase_db, `jobalerts/${data.destination?.account_id!}`)
+        const firebase_record = await get(query);
+        if (!firebase_record.exists()) return;
         //send a request timeout request
         if (data.ttl! < new Date().getTime()) {
           switch (data.status!) {
