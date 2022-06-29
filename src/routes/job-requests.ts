@@ -67,7 +67,6 @@ const project_key = (key: string) => {
 router
   .post("/requests", async (req, res) => {
     const body: Partial<RequestPayload> = req.body;
-    console.log(body);
     body.ttl = new Date().getTime() + ttl;
     const requestId = Randomstring.generate({ charset: "hex" });
     body.requestId = requestId;
