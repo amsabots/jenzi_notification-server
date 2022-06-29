@@ -73,13 +73,13 @@ router
     // create a new entry inside redis
     await set_data_to_redis(requestId, body);
     //send alert of job creation to redis
-    await create_firebase_entry(body.destination?.accountId!, {
+    await create_firebase_entry(body.destination?.account_id!, {
       status: "JOBREQUEST",
       requestId,
       user: body.user,
     });
     logger(
-      `[info: new job request created] [user: ${body.user?.clientId}] [destination: ${body.destination?.accountId}]`
+      `[info: new job request created] [user: ${body.user?.clientId}] [destination: ${body.destination?.account_id}]`
     );
     res.json({ requestId });
   })
@@ -106,7 +106,7 @@ router
   .delete("/requests/:requestId", async (req, res) => {
     const { requestId } = req.params;
     const d = await get_object_payload(requestId);
-    await remove_firebase_entry(d.destination?.accountId!);
+    await remove_firebase_entry(d.destination?.account_id!);
     await redis.redis.del(project_key(requestId));
     res.json({ requestId, message: "removed" });
   });
@@ -122,23 +122,23 @@ const house_keeper_checker = () => {
           switch (data.status!) {
             case "JOBREQUEST":
               logger(
-                `[info: job request timeout] [jobId: ${data.requestId}] [client: ${data.user?.clientId}] [fundi: ${data.destination?.accountId}]`
+                `[info: job request timeout] [jobId: ${data.requestId}] [client: ${data.user?.clientId}] [fundi: ${data.destination?.account_id}]`
               );
-              await update_project_entry(data.destination?.accountId!, {
+              await update_project_entry(data.destination?.account_id!, {
                 event: "PROJECTTIMEOUT",
               });
               //update redis record
               await redis.redis.del(project_key(data.requestId!));
               break;
             case "PROJECTTIMEOUT":
-              await remove_firebase_entry(data.destination?.accountId!);
+              await remove_firebase_entry(data.destination?.account_id!);
               break;
             case "REQUESTACCEPTED":
             case "REQUESTDECLINED":
             case "PROJECTCREATED":
               const new_ttl = data.ttl! + 30000;
               if (new_ttl < new Date().getTime()) {
-                await remove_firebase_entry(data.destination?.accountId!);
+                await remove_firebase_entry(data.destination?.account_id!);
                 await redis.redis.del(project_key(data.requestId!));
               }
               break;

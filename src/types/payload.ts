@@ -1,6 +1,6 @@
 export interface RequestPayload {
   user?: { clientId?: string; name?: String };
-  destination?: { accountId?: string; name?: String };
+  destination?: { account_id?: string; name?: String };
   payload?: {};
   ttl?: number;
   status?:
