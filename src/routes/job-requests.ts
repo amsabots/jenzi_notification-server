@@ -125,11 +125,12 @@ const house_keeper_checker = () => {
           return await redis.redis.del(project_key(data.requestId!));
         //
         const { event, requestId } = <never>firebase_record.toJSON()!;
+        const event_type = <string>event;
         //send a request timeout request
         if (data.ttl! < new Date().getTime()) {
           switch (data.status!.trim()) {
             case "JOBREQUEST":
-              if (data.status !== event) return;
+              if (data.status !== event_type.trim()) return;
               logger(
                 `[info: job request timeout] [jobId: ${data.requestId}] [client: ${data.user?.client_id}] [fundi: ${data.destination?.account_id}]`
               );
@@ -140,7 +141,7 @@ const house_keeper_checker = () => {
               await redis.redis.del(project_key(data.requestId!));
               break;
             case "PROJECTTIMEOUT":
-              if (data.status === event)
+              if (data.status === event_type.trim())
                 await remove_firebase_entry(data.destination?.account_id!);
               break;
             case "ACK":
