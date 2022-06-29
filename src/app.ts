@@ -6,9 +6,6 @@ import { PusherServer, ConsumeRabbitMessages } from "./consumers";
 import express from "express";
 import cors from "cors";
 
-// pusher consume modules
-import { startConsumption } from "./pusher-consumers";
-
 //routes
 import realtime_data_processor from "./routes/requests";
 import { ChatRouter } from "./routes/chats";
