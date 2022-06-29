@@ -122,6 +122,7 @@ const house_keeper_checker = () => {
         const firebase_record = await get(query);
         if (!firebase_record.exists())
           return await redis.redis.del(project_key(data.requestId!));
+        console.log(firebase_record.toJSON());
         //send a request timeout request
         if (data.ttl! < new Date().getTime()) {
           switch (data.status!.trim()) {
