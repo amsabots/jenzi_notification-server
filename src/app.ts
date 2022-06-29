@@ -2,14 +2,13 @@ import dotenv from "dotenv";
 dotenv.config();
 import { AMQPConnection } from "./config/rabbitmq";
 import { RedisInstance } from "./config/redis-master";
-import { PusherServer, ConsumeRabbitMessages } from "./consumers";
 import express from "express";
 import cors from "cors";
 
 //routes
-import realtime_data_processor from "./routes/requests";
 import { ChatRouter } from "./routes/chats";
 import { RequestsRouter, house_keeper_checker } from "./routes/job-requests";
+import { ConsumeRabbitMessages } from "./consumers";
 
 const app = express();
 
@@ -20,7 +19,6 @@ app.use(cors());
 const port = process.env.SERVER_PORT;
 
 //
-app.use("/realtime-server", realtime_data_processor);
 app.use("/chats", ChatRouter);
 app.use("/jobs", RequestsRouter);
 
