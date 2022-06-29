@@ -124,7 +124,7 @@ const house_keeper_checker = () => {
           return await redis.redis.del(project_key(data.requestId!));
         //send a request timeout request
         if (data.ttl! < new Date().getTime()) {
-          switch (data.status!) {
+          switch (data.status!.trim()) {
             case "JOBREQUEST":
               logger(
                 `[info: job request timeout] [jobId: ${data.requestId}] [client: ${data.user?.client_id}] [fundi: ${data.destination?.account_id}]`
