@@ -79,7 +79,7 @@ router
       user: body.user,
     });
     logger(
-      `[info: new job request created] [user: ${body.user?.clientId}] [destination: ${body.destination?.account_id}]`
+      `[info: new job request created] [user: ${body.user?.client_id}] [destination: ${body.destination?.account_id}]`
     );
     res.json({ requestId });
   })
@@ -122,7 +122,7 @@ const house_keeper_checker = () => {
           switch (data.status!) {
             case "JOBREQUEST":
               logger(
-                `[info: job request timeout] [jobId: ${data.requestId}] [client: ${data.user?.clientId}] [fundi: ${data.destination?.account_id}]`
+                `[info: job request timeout] [jobId: ${data.requestId}] [client: ${data.user?.client_id}] [fundi: ${data.destination?.account_id}]`
               );
               await update_project_entry(data.destination?.account_id!, {
                 event: "PROJECTTIMEOUT",

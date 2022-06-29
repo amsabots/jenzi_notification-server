@@ -1,14 +1,10 @@
 export interface RequestPayload {
-  user?: { clientId?: string; name?: String };
+  user?: { client_id?: string; name?: String };
   destination?: { account_id?: string; name?: String };
   payload?: {};
   ttl?: number;
-  status?:
-    | "JOBREQUEST"
-    | "REQUESTDECLINED"
-    | "REQUESTACCEPTED"
-    | "PROJECTCREATED"
-    | "PROJECTTIMEOUT";
+  //prettier-ignore
+  status?:| "JOBREQUEST"| "REQUESTDECLINED"| "REQUESTACCEPTED"| "PROJECTCREATED"| "PROJECTTIMEOUT";
   requestId?: string;
   createdAt?: number;
 }
