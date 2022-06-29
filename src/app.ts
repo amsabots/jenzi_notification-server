@@ -28,12 +28,10 @@ app.use("/chats", ChatRouter);
 app.use("/jobs", RequestsRouter);
 
 process.on("uncaughtException", (err) => {
-  console.log(
-    `[error: uncaught exception] [error name: ${err.name}] [actual error: ${err.message}]`
-  );
+  console.log(err);
 });
 process.on("unhandledRejection", (err) => {
-  console.log(`[error: unhandled promise rejections] [error desc: ${err}]`);
+  console.log(err);
 });
 
 (async () => {
