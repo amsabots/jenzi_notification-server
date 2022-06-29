@@ -120,7 +120,8 @@ const house_keeper_checker = () => {
         //prettier-ignore
         const query = ref(firebase_db, `jobalerts/${data.destination?.account_id!}`)
         const firebase_record = await get(query);
-        if (!firebase_record.exists()) return;
+        if (!firebase_record.exists())
+          return await redis.redis.del(project_key(data.requestId!));
         //send a request timeout request
         if (data.ttl! < new Date().getTime()) {
           switch (data.status!) {
@@ -137,16 +138,12 @@ const house_keeper_checker = () => {
             case "PROJECTTIMEOUT":
               await remove_firebase_entry(data.destination?.account_id!);
               break;
-            case "REQUESTACCEPTED":
-            case "REQUESTDECLINED":
-            case "PROJECTCREATED":
+            default:
               const new_ttl = data.ttl! + 30000;
               if (new_ttl < new Date().getTime()) {
                 await remove_firebase_entry(data.destination?.account_id!);
                 await redis.redis.del(project_key(data.requestId!));
               }
-              break;
-            default:
               break;
           }
         }
